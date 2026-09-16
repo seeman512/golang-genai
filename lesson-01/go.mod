@@ -1,3 +1,3 @@
-module lesson-01
+module lesson01
 
 go 1.27.1
