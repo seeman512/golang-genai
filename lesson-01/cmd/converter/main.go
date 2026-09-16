@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"example.com/lesson01/converter"
+	"lesson01/converter"
 )
 
 func main() {
