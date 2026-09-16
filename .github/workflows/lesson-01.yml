@@ -1,0 +1,61 @@
+name: Lesson 1 Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Format, vet, test, and build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: lesson-01
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.1"
+          cache: false
+
+      - name: Check repository structure
+        run: |
+          missing=0
+          for f in README.md greet/greet.go converter/converter.go; do
+            if [ ! -f "$f" ]; then
+              echo "Missing required file: $f"
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -eq 1 ]; then
+            exit 1
+          fi
+          echo "All required files are present"
+
+      - name: Check formatting
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "The following files are not formatted:"
+            echo "$unformatted"
+            exit 1
+          fi
+          echo "Formatting is valid"
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run tests with coverage
+        run: go test ./... -v -cover
+
+      - name: Build all packages
+        run: go build ./...
