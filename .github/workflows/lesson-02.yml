@@ -1,14 +1,14 @@
-name: Lesson 1 Tests
+name: Lesson 2 Tests
 
 on:
   push:
     branches: [main]
     paths:
-      - "lesson-01/**"
+      - "lesson-02/**"
   pull_request:
     branches: [main]
     paths:
-      - "lesson-01/**"
+      - "lesson-02/**"
   workflow_dispatch:
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: lesson-01
+        working-directory: lesson-02
 
     steps:
       - name: Checkout repository
@@ -33,7 +33,7 @@ jobs:
       - name: Check repository structure
         run: |
           missing=0
-          for f in README.md greet/greet.go converter/converter.go; do
+          for f in README.md library/library.go nilslice/nilslice.go; do
             if [ ! -f "$f" ]; then
               echo "Missing required file: $f"
               missing=1
@@ -44,6 +44,14 @@ jobs:
             exit 1
           fi
           echo "All required files are present"
+
+      - name: Check task 3 summary
+        run: |
+          if grep -q "TODO(завдання-3)" README.md; then
+            echo "Task 3 summary still contains the TODO placeholder."
+            exit 1
+          fi
+          echo "Task 3 summary is filled in"
 
       - name: Check formatting
         run: |
