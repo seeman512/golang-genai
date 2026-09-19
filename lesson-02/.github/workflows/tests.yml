@@ -1,0 +1,70 @@
+name: Домашнє завдання · Урок 2 (Go + GenAI)
+
+# Запускається автоматично при push у main і при кожному Pull Request.
+# Реалізує той самий чекліст ідіоматичного Go, що і на занятті:
+# gofmt, go vet, тести з покриттям, збірка проєкту.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Форматування, лінт і тести
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Отримати код репозиторію
+        uses: actions/checkout@v4
+
+      - name: Встановити Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: Перевірити структуру репозиторію
+        run: |
+          missing=0
+          for f in README.md library/library.go nilslice/nilslice.go; do
+            if [ ! -f "$f" ]; then
+              echo "❌ Відсутній обов'язковий файл: $f"
+              missing=1
+            fi
+          done
+          if [ "$missing" -eq 1 ]; then
+            exit 1
+          fi
+          echo "✅ Усі обов'язкові файли на місці"
+
+      - name: Перевірити, що підсумок Завдання 3 заповнено
+        run: |
+          if grep -q "TODO(завдання-3)" README.md; then
+            echo "❌ Розділ 'Завдання 3 — Мій підсумок' у README.md ще містить TODO-заглушку."
+            echo "Видаліть HTML-коментар і напишіть власне пояснення (3-5 речень) видимим текстом."
+            exit 1
+          fi
+          echo "✅ Підсумок для Завдання 3 заповнено"
+
+      - name: Перевірити форматування (gofmt)
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "❌ Наступні файли не відформатовано за допомогою gofmt:"
+            echo "$unformatted"
+            echo ""
+            echo "Запустіть локально: gofmt -w ."
+            exit 1
+          fi
+          echo "✅ Форматування в порядку"
+
+      - name: Статичний аналіз (go vet)
+        run: go vet ./...
+
+      - name: Запустити тести з покриттям
+        run: go test ./... -v -cover
+
+      - name: Зібрати всі бінарники
+        run: go build ./...
