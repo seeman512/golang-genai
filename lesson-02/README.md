@@ -106,17 +106,14 @@ go test ./nilslice/... -v -cover
 
 ### Завдання 3 — Мій підсумок
 
-<!-- TODO(завдання-3): видаліть цей HTML-коментар і напишіть під
-     заголовком вище власне пояснення (3-5 речень) звичайним видимим
-     текстом Markdown.
-
-     Підказки, на які варто відповісти:
-     - Чим відрізняється внутрішній стан nil-зрізу і порожнього зрізу?
-     - Що показує reflect.DeepEqual(NilResult(), EmptyResult())?
-     - Коли ця різниця реально впливає на поведінку програми
-       (наприклад, маршалинг JSON)? -->
-
----
+| Feature | Nil slice | Empty slice |
+|---|---|---|
+| How to declare | `var s []int` | `s := []int{}` or `make([]int, 0)` |
+| `s == nil` | `true` | `false` |
+| Length (`len(s)`) | `0` | `0` |
+| Capacity (`cap(s)`) | `0` | `0` |
+| Underlying pointer | Points to `nil` | Points to a zero-sized memory address |
+| JSON encoding | `null` | `[]` |
 
 ## Що саме перевіряє CI (GitHub Actions)
 

@@ -5,7 +5,7 @@ package main
 import (
 	"fmt"
 
-	"example.com/lesson02/library"
+	"lesson02/library"
 )
 
 func main() {
