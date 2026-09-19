@@ -119,3 +119,8 @@ func TestSortByYear_SortsInPlace(t *testing.T) {
 		t.Errorf("сортування має бути in-place: original[0].Title = %q, want %q", original[0].Title, "A")
 	}
 }
+
+// TestLesson02WorkflowTrigger is a marker test for the lesson-specific CI workflow.
+func TestLesson02WorkflowTrigger(t *testing.T) {
+	t.Log("lesson-02 workflow was triggered")
+}
