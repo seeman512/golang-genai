@@ -25,7 +25,7 @@ Pull Request — запуште код у гілку `main` або відкри�
 ├── prompts/
 │   └── interface-extraction-prompt.md  ← ваш промпт із Розділу 2
 ├── REPORT.md              ← фінальний звіт (Розділ 3, результат)
-└── .github/workflows/tests.yml  ← CI-конвеєр (не редагувати)
+└── ../.github/workflows/lesson-03.yml  ← CI-конвеєр (не редагувати)
 ```
 
 ---
@@ -143,7 +143,7 @@ go test ./orders/... -v -cover
 
 ## Що саме перевіряє CI (GitHub Actions)
 
-Конвеєр `.github/workflows/tests.yml` на кожен push/PR виконує
+Конвеєр `../.github/workflows/lesson-03.yml` на кожен push/PR виконує
 повний чекліст ідіоматичного Go з цього заняття:
 
 | Крок                                  | Що перевіряє                                                |
