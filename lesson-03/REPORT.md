@@ -1,27 +1,30 @@
-# Звіт до домашньої роботи · Урок 3
+# Homework Report · Lesson 3
 
-## 1. Посилання на код
+## 1. Link to the code
 
-<!-- TODO(звіт-1): видаліть цей HTML-коментар і вставте посилання на
-     ваш робочий Go-код із Розділу 1 (наприклад, посилання на цей
-     самий репозиторій / конкретний коміт / гілку). -->
+[Lesson 3 source code in this repository](https://github.com/seeman512/golang-genai/tree/main/lesson-03)
 
-## 2. Промпт з Розділу 2
+## 2. Prompt from Section 2
 
-Точний текст промпту зберігається в
-[`prompts/interface-extraction-prompt.md`](./prompts/interface-extraction-prompt.md).
+[Interface extraction prompt](https://github.com/seeman512/golang-genai/blob/main/lesson-03/prompts/interface-extraction-prompt.md)
 
-## 3. Міксовані приймачі та інтерфейси на стороні споживача
+## 3. Mixed receivers and consumer-side interfaces
 
-Дайте відповідь своїми словами (1-2 абзаци) на питання: *«Чому
-міксування value та pointer ресиверів є небезпечним і як ШІ допомагає
-проектувати інтерфейси на стороні споживача?»*
+Mixing value and pointer receivers on the same type can be dangerous because
+it makes method behavior and interface satisfaction less predictable. A value
+receiver operates on a copy, while a pointer receiver can modify the original
+value. In addition, a type's method set differs from that of its pointer, so a
+value may no longer satisfy an interface when one of its methods uses a pointer
+receiver. Using pointer receivers consistently for stateful types makes it
+clear that methods operate on the original value and avoids accidental copies.
 
-<!-- TODO(звіт-3): видаліть цей HTML-коментар і напишіть вашу
-     відповідь (1-2 абзаци) звичайним видимим текстом Markdown. -->
+AI can help design consumer-side interfaces by inspecting how a service uses a
+dependency and extracting only the methods required by that service. This
+keeps the abstraction small, makes dependency injection straightforward, and
+allows lightweight fakes or mocks to be used in tests without a real database.
+The generated design should still be reviewed and verified against the
+project's existing API, tests, and behavior.
 
-## 4. Скріншоти / відео виконання
+## 4. Screenshots / video of the completed work
 
-<!-- TODO(звіт-4): видаліть цей HTML-коментар і вставте посилання на
-     Google Doc / відео зі скріншотами роботи програми та виконаного
-     завдання. -->
+[Screen recording and screenshots](https://drive.google.com/file/d/1wU9mn5YuG-uukj0E-ZKW9DNWwx7OuXQL/view?usp=drive_link)
