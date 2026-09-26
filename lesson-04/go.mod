@@ -1,3 +1,3 @@
-module example.com/lesson04
+module lesson04
 
-go 1.22
+go 1.27.1

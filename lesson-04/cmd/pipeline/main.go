@@ -10,7 +10,7 @@ package main
 import (
 	"fmt"
 
-	"example.com/lesson04/pipeline"
+	"lesson04/pipeline"
 )
 
 func main() {
