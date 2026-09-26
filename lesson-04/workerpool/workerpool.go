@@ -5,6 +5,7 @@ package workerpool
 
 import (
 	"context"
+	"sync"
 	"time"
 )
 
@@ -23,12 +24,21 @@ type Result struct {
 	Err   error
 }
 
+// executeJob runs one job with a dedicated timeout context.
+func executeJob(job Job, timeout time.Duration) Result {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	size, err := job.Fetch(ctx)
+	return Result{JobID: job.ID, Size: size, Err: err}
+}
+
 // RunPool запускає рівно numWorkers горутин-воркерів, які беруть
 // завдання з jobs і надсилають Result у повернутий канал. Кожному
 // Job надається не більше timeout часу — якщо job.Fetch не встигає,
 // Result.Err міститиме помилку тайм-ауту (context.DeadlineExceeded).
 //
-// TODO (Завдання 3): реалізуйте цю функцію.
+// (Завдання 3): реалізуйте цю функцію.
 //   - запустіть рівно numWorkers горутин (використайте sync.WaitGroup,
 //     щоб знати, коли всі вони завершили);
 //   - кожен воркер у циклі `for job := range jobs` для кожного job:
@@ -44,7 +54,24 @@ type Result struct {
 // перевіряє ctx.Done() (дивіться приклад slowFetch у тестах).
 func RunPool(jobs <-chan Job, numWorkers int, timeout time.Duration) <-chan Result {
 	results := make(chan Result)
-	// TODO: ваш код тут
-	close(results)
+
+	var wg sync.WaitGroup
+	wg.Add(numWorkers)
+
+	for range numWorkers {
+		go func() {
+			defer wg.Done()
+
+			for job := range jobs {
+				results <- executeJob(job, timeout)
+			}
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
 	return results
 }
