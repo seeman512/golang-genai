@@ -83,7 +83,7 @@ func (w *CryptoWallet) Pay(amount float64) error {
 // не важливо, CreditCard це чи CryptoWallet.
 func ProcessPayment(method PaymentMethod, amount float64) error {
 	if err := method.Pay(amount); err != nil {
-		return err
+		return fmt.Errorf("payment: process transaction: %w", err)
 	}
 	fmt.Printf("Payment successful. %s\n", method.LogInfo())
 	return nil

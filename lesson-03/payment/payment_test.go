@@ -1,6 +1,7 @@
 package payment
 
 import (
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -106,6 +107,27 @@ func TestCryptoWalletPayInsufficientBalance(t *testing.T) {
 
 	if err := wallet.Pay(999); err == nil {
 		t.Error("Pay(999) не повернув помилку при недостатньому балансі")
+	}
+}
+
+type failingPaymentMethod struct {
+	err error
+}
+
+func (m failingPaymentMethod) Pay(float64) error { return m.err }
+func (failingPaymentMethod) LogInfo() string     { return "failing payment method" }
+
+func TestProcessPaymentWrapsError(t *testing.T) {
+	cause := errors.New("processor unavailable")
+	err := ProcessPayment(failingPaymentMethod{err: cause}, 20)
+	if err == nil {
+		t.Fatal("ProcessPayment очікувано мав повернути помилку")
+	}
+	if !errors.Is(err, cause) {
+		t.Errorf("ProcessPayment error = %v, want it to wrap cause %v", err, cause)
+	}
+	if !strings.Contains(err.Error(), "payment: process transaction") {
+		t.Errorf("ProcessPayment error = %q, want operation context", err)
 	}
 }
 

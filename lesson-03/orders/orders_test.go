@@ -43,11 +43,16 @@ func TestPlaceOrder_Success(t *testing.T) {
 }
 
 func TestPlaceOrder_PropagatesError(t *testing.T) {
-	store := &fakeStore{err: errors.New("db is down")}
+	storeErr := errors.New("db is down")
+	store := &fakeStore{err: storeErr}
 	svc := NewOrderService(store)
 
-	if err := svc.PlaceOrder("order-2", 10); err == nil {
+	err := svc.PlaceOrder("order-2", 10)
+	if err == nil {
 		t.Fatal("PlaceOrder мав повернути помилку, коли store.Exec її повертає")
+	}
+	if !errors.Is(err, storeErr) {
+		t.Errorf("PlaceOrder error = %v, want it to wrap store error %v", err, storeErr)
 	}
 }
 
@@ -63,8 +68,10 @@ func TestOrderServiceUsesInjectedStore(t *testing.T) {
 		t.Fatal("NewOrderService повернув nil")
 	}
 
-	_ = svc.PlaceOrder("order-3", 5)
-	if store.calls == 0 {
-		t.Error("PlaceOrder не викликав store.Exec — перевірте, що сервіс справді використовує injected store")
+	if err := svc.PlaceOrder("order-3", 5); err != nil {
+		t.Fatalf("PlaceOrder повернув неочікувану помилку: %v", err)
+	}
+	if store.calls != 1 {
+		t.Errorf("Exec викликано %d разів, очікувалось 1", store.calls)
 	}
 }

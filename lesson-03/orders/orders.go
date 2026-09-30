@@ -9,6 +9,8 @@
 // ШІ тест додайте окремо (наприклад, у orders_ai_test.go) для звіту.
 package orders
 
+import "fmt"
+
 // OrderStore — мінімальний інтерфейс для залежності від БД
 // (Завдання 2.1). Замінює прямий *sql.DB, дотримуючись приказки
 // Роба Пайка: "чим більший інтерфейс, тим слабша абстракція".
@@ -29,9 +31,12 @@ func NewOrderService(store OrderStore) *OrderService {
 
 // PlaceOrder виконує вставку замовлення через store.
 func (s *OrderService) PlaceOrder(orderID string, amount float64) error {
-	return s.store.Exec(
+	if err := s.store.Exec(
 		"INSERT INTO orders (id, amount) VALUES (?, ?)",
 		orderID,
 		amount,
-	)
+	); err != nil {
+		return fmt.Errorf("orders: place order %q: %w", orderID, err)
+	}
+	return nil
 }
