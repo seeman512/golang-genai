@@ -1,0 +1,182 @@
+name: Lesson 5 Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lesson-05/**"
+      - ".github/workflows/lesson-05.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "lesson-05/**"
+      - ".github/workflows/lesson-05.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Format, vet, test, and build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: lesson-05
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.1"
+          cache: false
+
+      - name: Check repository structure
+        id: structure
+        continue-on-error: true
+        run: |
+          missing=0
+          for f in README.md go.mod \
+                   task0_refactor/cmd/app/main.go \
+                   task0_refactor/internal/calculator/calculator.go \
+                   task0_refactor/internal/textanalyzer/textanalyzer.go \
+                   task1_validation/validator.go \
+                   task2_retry/retry.go; do
+            if [ ! -f "$f" ]; then
+              echo "Missing required file: $f"
+              missing=1
+            fi
+          done
+          if [ "$missing" -eq 1 ]; then
+            exit 1
+          fi
+          echo "All required files are present"
+
+      - name: Check formatting
+        id: fmt
+        continue-on-error: true
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "The following files are not formatted:"
+            echo "$unformatted"
+            exit 1
+          fi
+          echo "Formatting is valid"
+
+      - name: Build all packages
+        id: build
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          go build ./... 2>&1 | tee build.log
+          status=${PIPESTATUS[0]}
+          exit "$status"
+
+      - name: Task 0 — Refactor into multi-package project
+        id: task0
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo "::group::Task 0 — task0_refactor (calculator + textanalyzer)"
+          set +e
+          go test ./task0_refactor/... -v 2>&1 | tee task0.log
+          status=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          exit "$status"
+
+      - name: Task 1 — Registration form validator
+        id: task1
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo "::group::Task 1 — task1_validation"
+          set +e
+          go test ./task1_validation/... -v 2>&1 | tee task1.log
+          status=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          exit "$status"
+
+      - name: Task 2 — Retry mechanism
+        id: task2
+        continue-on-error: true
+        shell: bash
+        run: |
+          echo "::group::Task 2 — task2_retry"
+          set +e
+          go test ./task2_retry/... -v 2>&1 | tee task2.log
+          status=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          exit "$status"
+
+      - name: go vet
+        id: vet
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          go vet ./... 2>&1 | tee vet.log
+          status=${PIPESTATUS[0]}
+          exit "$status"
+
+      - name: Summary — full report of all checks
+        if: always()
+        run: |
+          echo "## Lesson 5 CI Report — Error Handling" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          report_check() {
+            local title="$1"
+            local outcome="$2"
+            if [ "$outcome" = "success" ]; then
+              echo "- ✅ **$title** — passed" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- ❌ **$title** — FAILED" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          }
+
+          report_check "Repository structure" "${{ steps.structure.outcome }}"
+          report_check "Formatting (gofmt)" "${{ steps.fmt.outcome }}"
+          report_check "Build (go build ./...)" "${{ steps.build.outcome }}"
+          report_check "Task 0 — task0_refactor" "${{ steps.task0.outcome }}"
+          report_check "Task 1 — task1_validation" "${{ steps.task1.outcome }}"
+          report_check "Task 2 — task2_retry" "${{ steps.task2.outcome }}"
+          report_check "go vet ./..." "${{ steps.vet.outcome }}"
+
+      - name: Print full test and analysis logs
+        if: always()
+        run: |
+          for f in build.log task0.log task1.log task2.log vet.log; do
+            if [ -f "$f" ]; then
+              echo "===================================================="
+              echo "FULL LOG: $f"
+              echo "===================================================="
+              cat "$f"
+              echo ""
+            fi
+          done
+
+      - name: Fail the job if any check failed
+        if: always()
+        run: |
+          failed=0
+          for outcome in \
+            "${{ steps.structure.outcome }}" \
+            "${{ steps.fmt.outcome }}" \
+            "${{ steps.build.outcome }}" \
+            "${{ steps.task0.outcome }}" \
+            "${{ steps.task1.outcome }}" \
+            "${{ steps.task2.outcome }}" \
+            "${{ steps.vet.outcome }}"; do
+            if [ "$outcome" != "success" ]; then
+              failed=1
+            fi
+          done
+
+          if [ "$failed" -eq 1 ]; then
+            echo "One or more checks failed. See the summary and step logs above."
+            exit 1
+          fi
+          echo "All checks passed."
