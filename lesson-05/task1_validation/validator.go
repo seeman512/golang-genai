@@ -6,6 +6,7 @@ package validation
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 // RegistrationForm — вхідні дані форми реєстрації, які потрібно перевірити.
@@ -52,7 +53,7 @@ func ValidateRegistration(f RegistrationForm) error {
 		fields = append(fields, "email")
 	}
 
-	if len(f.Password) < 8 {
+	if utf8.RuneCountInString(f.Password) < 8 {
 		fields = append(fields, "password")
 	}
 

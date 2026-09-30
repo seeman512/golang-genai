@@ -17,12 +17,12 @@ var ErrEmptyText = errors.New("textanalyzer: empty text")
 //
 // (Завдання 0): реалізуйте.
 func WordCount(text string) (int, error) {
-	trimmed := strings.TrimSpace(text)
-	if trimmed == "" {
+	words := strings.Fields(text)
+	if len(words) == 0 {
 		return 0, fmt.Errorf("textanalyzer: word count: %w", ErrEmptyText)
 	}
 
-	return len(strings.Split(trimmed, " ")), nil
+	return len(words), nil
 }
 
 // CharCount повертає кількість символів (рун) у text, без урахування
