@@ -25,7 +25,7 @@ type Operation func() (string, error)
 // Якщо всі спроби вичерпано, Do повертає чітко обгорнуту фінальну помилку
 // (з інформацією про кількість спроб).
 //
-// TODO(Завдання 2): реалізуйте функцію Do.
+// (Завдання 2): реалізуйте функцію Do.
 // Вимоги:
 //   - maxAttempts має бути >= 1; якщо операція вдається одразу — повторів немає
 //   - між спробами (окрім останньої) чекайте backoff перед наступною спробою
@@ -34,8 +34,27 @@ type Operation func() (string, error)
 //   - якщо всі спроби вичерпано — поверніть обгорнуту фінальну помилку,
 //     яка через errors.Is все ще розпізнається як ErrTemporary
 func Do(op Operation, maxAttempts int, backoff time.Duration) (string, error) {
-	// TODO: реалізуйте
-	panic("not implemented")
+	var lastErr error
+
+	for i := range maxAttempts {
+		result, err := op()
+
+		if err == nil {
+			return result, nil
+		}
+
+		if !errors.Is(err, ErrTemporary) {
+			return "", fmt.Errorf("do process error: attempt: %d; error: %w", i+1, err)
+		}
+
+		if i != maxAttempts-1 {
+			time.Sleep(backoff)
+		}
+
+		lastErr = err
+	}
+
+	return "", fmt.Errorf("all attempts failed; last error: %w", lastErr)
 }
 
 // NewFlakyOperation — допоміжна функція для тестів/демонстрації: повертає
