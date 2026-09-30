@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/softserve/go-with-genai-topic4-error-handling/task0_refactor/internal/calculator"
-	"github.com/softserve/go-with-genai-topic4-error-handling/task0_refactor/internal/textanalyzer"
+	"lesson05/task0_refactor/internal/calculator"
+	"lesson05/task0_refactor/internal/textanalyzer"
 )
 
 func main() {

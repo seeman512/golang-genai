@@ -1,3 +1,3 @@
-module github.com/softserve/go-with-genai-topic4-error-handling
+module lesson05
 
-go 1.22
+go 1.27.1
