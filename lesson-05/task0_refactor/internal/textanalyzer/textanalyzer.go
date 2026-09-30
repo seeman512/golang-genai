@@ -15,19 +15,22 @@ var ErrEmptyText = errors.New("textanalyzer: empty text")
 // символами). Якщо text порожній (або складається лише з пробілів),
 // повертає помилку, що через %w обгортає ErrEmptyText.
 //
-// TODO(Завдання 0): реалізуйте.
+// (Завдання 0): реалізуйте.
 func WordCount(text string) (int, error) {
 	trimmed := strings.TrimSpace(text)
 	if trimmed == "" {
 		return 0, fmt.Errorf("textanalyzer: word count: %w", ErrEmptyText)
 	}
-	panic("not implemented")
+
+	return len(strings.Split(trimmed, " ")), nil
 }
 
 // CharCount повертає кількість символів (рун) у text, без урахування
 // пробільних символів на початку/в кінці.
 //
-// TODO(Завдання 0): реалізуйте.
+// (Завдання 0): реалізуйте.
 func CharCount(text string) int {
-	panic("not implemented")
+	trimmed := strings.TrimSpace(text)
+
+	return len([]rune(trimmed))
 }
