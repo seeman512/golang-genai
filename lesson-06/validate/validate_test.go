@@ -7,15 +7,17 @@
 // the others. Run `go test -v ./validate/...` and read every FAIL line.
 package validate
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 const minCases = 8
 
 // emailCases is the table of test cases for ValidateEmail.
 //
-// TODO: add at least 5 more cases here — for example: whitespace inside
-// the address, a missing domain, a trailing dot, consecutive dots, a
-// very long local part, or a unicode character.
+// The table includes malformed addresses and boundary cases in addition
+// to the basic valid examples.
 var emailCases = []struct {
 	name  string
 	input string
@@ -24,8 +26,14 @@ var emailCases = []struct {
 	{"valid simple", "student@softserve.academy", true},
 	{"missing at sign", "student-softserve.academy", false},
 	{"empty string", "", false},
-
-	// TODO: add at least 5 more cases here.
+	{"whitespace inside", "student name@example.com", false},
+	{"missing domain", "student@", false},
+	{"trailing dot", "student@example.com.", false},
+	{"consecutive dots", "student..name@example.com", false},
+	{"unicode character", "élève@example.com", false},
+	{"valid plus tag", "student+tag@example.com", true},
+	{"valid single-label domain", "student@localhost", true},
+	{"local part too long", strings.Repeat("a", 65) + "@example.com", false},
 }
 
 func TestValidateEmail(t *testing.T) {
@@ -51,9 +59,8 @@ func TestValidateEmail(t *testing.T) {
 // This is only required if your mentor asked you to validate phone
 // numbers instead of (or in addition to) email addresses.
 //
-// TODO: add at least 5 more cases here — for example: missing digits,
-// letters mixed in, an unexpected country code format, or extra
-// separators like spaces, dots or parentheses.
+// The table includes malformed numbers and examples of each accepted
+// format.
 var phoneCases = []struct {
 	name  string
 	input string
@@ -62,8 +69,14 @@ var phoneCases = []struct {
 	{"valid with plus", "+380501234567", true},
 	{"contains letters", "050-abc-4567", false},
 	{"empty string", "", false},
-
-	// TODO: add at least 5 more cases here.
+	{"valid national format", "050-123-4567", true},
+	{"valid national digits", "0501234567", true},
+	{"international too short", "+380501234", false},
+	{"international too long", "+3805012345678901", false},
+	{"spaces are not accepted", "+380 50 123 4567", false},
+	{"parentheses are not accepted", "+380(50)1234567", false},
+	{"dots are not accepted", "050.123.4567", false},
+	{"wrong national digit count", "050-123-456", false},
 }
 
 func TestValidatePhone(t *testing.T) {
