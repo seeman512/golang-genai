@@ -9,7 +9,9 @@
 package todo
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -24,24 +26,46 @@ type Todo struct {
 // SaveTodos writes the given todos to the file at path as JSON,
 // creating the file if it does not exist and overwriting it if it does.
 //
-// TODO: implement this function.
+// implement this function.
 //   - Marshal todos to JSON (json.Marshal or json.MarshalIndent).
 //   - Write the result to path (os.WriteFile is the simplest option).
 //   - Wrap any error with context using fmt.Errorf("...: %w", err).
 func SaveTodos(path string, todos []Todo) error {
-	// TODO: implement me
-	return fmt.Errorf("SaveTodos: not implemented")
+	data, err := json.MarshalIndent(todos, "", "\t")
+	if err != nil {
+		return fmt.Errorf("parse json error: %w", err)
+	}
+
+	err = os.WriteFile(path, data, 0644)
+
+	if err != nil {
+		return fmt.Errorf("save file %s error: %w", path, err)
+	}
+
+	return nil
 }
 
 // LoadTodos reads and parses the todo list stored at path.
 //
-// TODO: implement this function.
+// : implement this function.
 //   - Read the file at path (os.ReadFile).
 //   - Unmarshal the JSON bytes into a []Todo.
 //   - Wrap errors so callers can tell "file missing" apart from
 //     "malformed JSON" if they inspect the error (e.g. via errors.Is
 //     against os.ErrNotExist, or by checking for a *json.SyntaxError).
 func LoadTodos(path string) ([]Todo, error) {
-	// TODO: implement me
-	return nil, fmt.Errorf("LoadTodos: not implemented")
+	data, err := os.ReadFile(path)
+
+	todos := []Todo{}
+
+	if err != nil {
+		return todos, fmt.Errorf("open file %s error: %w", path, err)
+	}
+
+	err = json.Unmarshal(data, &todos)
+	if err != nil {
+		return todos, fmt.Errorf("parse json %s error: %w", path, err)
+	}
+
+	return todos, nil
 }
