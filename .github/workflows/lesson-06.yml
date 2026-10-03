@@ -1,45 +1,49 @@
 name: Lesson 6 Homework Check
 
-# Runs on every push and PR so students get feedback as they work.
+# Run this workflow only when Lesson 6 or this workflow changes.
 on:
   push:
-    branches: ["**"]
+    branches: [main]
+    paths:
+      - "lesson-06/**"
+      - ".github/workflows/lesson-06.yml"
   pull_request:
+    branches: [main]
+    paths:
+      - "lesson-06/**"
+      - ".github/workflows/lesson-06.yml"
   workflow_dispatch:
 
-# Important: this workflow is deliberately built so that ONE failing
-# task never hides the others. Every check step below either:
-#   - uses `continue-on-error: true` so a failure doesn't stop the job, or
-#   - never exits non-zero itself (it just records a result),
-# and every step after it uses `if: always()` so it still runs and its
-# full output (every failing sub-test, not just the first one) reaches
-# the log. A final "Final result" step then looks at everything that
-# was recorded and fails the job as a whole if anything is incomplete —
-# so the overall check is still accurate (red ✗ if homework isn't done),
-# but you get the COMPLETE list of what's left, in one run, every time.
+# Keep all checks running so one failing task never hides failures in the
+# other tasks. The final step reports the combined result.
 concurrency:
-  group: homework-check-${{ github.ref }}
+  group: lesson-06-check-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   check:
-    name: Run all homework checks
+    name: Run all Lesson 6 homework checks
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: lesson-06
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
-          check-latest: true
+          go-version: "1.27.1"
+          cache: false
 
       - name: Download dependencies
         run: go mod download
 
       # --- Build sanity check ----------------------------------------
-      - name: "Build check (go vet)"
+      - name: Build check (go vet)
         id: vet
         continue-on-error: true
         run: |
@@ -48,18 +52,18 @@ jobs:
           echo "::endgroup::"
 
       # --- Task 1: todo/ (save/load JSON) -----------------------------
-      - name: "Task 1 — todo package tests"
+      - name: Task 1 — todo package tests
         id: task1_tests
         if: always()
         continue-on-error: true
         shell: bash
         run: |
-          echo "::group::go test -v ./todo/...  (every FAIL line below is a separate missing/incorrect case)"
+          echo "::group::go test -v ./todo/..."
           set -o pipefail
           go test -v -count=1 ./todo/... 2>&1 | tee task1-output.log
           echo "::endgroup::"
 
-      - name: "Task 1 — coverage (need >= 80%)"
+      - name: Task 1 — coverage (need >= 80%)
         id: task1_coverage
         if: always()
         shell: bash
@@ -79,19 +83,19 @@ jobs:
           echo "::endgroup::"
 
       # --- Task 2: validate/ (email/phone validation) -----------------
-      - name: "Task 2 — validate package tests"
+      - name: Task 2 — validate package tests
         id: task2_tests
         if: always()
         continue-on-error: true
         shell: bash
         run: |
-          echo "::group::go test -v ./validate/...  (every FAIL line below is a separate missing/incorrect case)"
+          echo "::group::go test -v ./validate/..."
           set -o pipefail
           go test -v -count=1 ./validate/... 2>&1 | tee task2-output.log
           echo "::endgroup::"
 
       # --- Task 3: AI blind-testing report (mentor-reviewed) ----------
-      - name: "Task 3 — AI report present"
+      - name: Task 3 — AI report present
         id: task3_report
         if: always()
         shell: bash
@@ -110,7 +114,7 @@ jobs:
           echo "::endgroup::"
 
       # --- Human-readable summary --------------------------------------
-      - name: "Write job summary"
+      - name: Write job summary
         if: always()
         shell: bash
         run: |
@@ -123,7 +127,7 @@ jobs:
             if [ "${{ steps.task1_tests.outcome }}" = "success" ]; then
               T1="✅ pass"
             else
-              T1="❌ FAIL — open the *Task 1 — todo package tests* log above, every FAIL line there is a separate issue"
+              T1="❌ FAIL — see the Task 1 test log"
             fi
             COV_ICON="✅"
             if [ "${{ steps.task1_coverage.outputs.ok }}" != "true" ]; then COV_ICON="❌"; fi
@@ -132,7 +136,7 @@ jobs:
             if [ "${{ steps.task2_tests.outcome }}" = "success" ]; then
               T2="✅ pass"
             else
-              T2="❌ FAIL — open the *Task 2 — validate package tests* log above, every FAIL line there is a separate issue"
+              T2="❌ FAIL — see the Task 2 test log"
             fi
             echo "| 2. email/phone validation tests | $T2 | at least 8 cases required per table |"
 
@@ -142,25 +146,21 @@ jobs:
               T3="⚠️ report missing or too short — fill in ai-blind-testing/REPORT.md"
             fi
             echo "| 3. AI blind test generation report | $T3 | not auto-graded — reviewed by your mentor |"
-
-            echo
-            echo "**Every failing test case from every task above is printed in full in the step logs —"
-            echo "scroll up through *Task 1* and *Task 2* to see the complete list, not just the first failure.**"
           } >> "$GITHUB_STEP_SUMMARY"
 
       # --- Final pass/fail gate for the whole job -----------------------
-      - name: "Final result"
+      - name: Final result
         if: always()
         shell: bash
         run: |
           FAILED=0
 
           if [ "${{ steps.vet.outcome }}" != "success" ]; then
-            echo "::error::go vet reported problems — see the 'Build check (go vet)' log."
+            echo "::error::go vet reported problems."
             FAILED=1
           fi
           if [ "${{ steps.task1_tests.outcome }}" != "success" ]; then
-            echo "::error::Task 1 (todo) has failing tests — see the 'Task 1 — todo package tests' log for the full list."
+            echo "::error::Task 1 (todo) has failing tests."
             FAILED=1
           fi
           if [ "${{ steps.task1_coverage.outputs.ok }}" != "true" ]; then
@@ -168,14 +168,13 @@ jobs:
             FAILED=1
           fi
           if [ "${{ steps.task2_tests.outcome }}" != "success" ]; then
-            echo "::error::Task 2 (validate) has failing tests — see the 'Task 2 — validate package tests' log for the full list."
+            echo "::error::Task 2 (validate) has failing tests."
             FAILED=1
           fi
 
           if [ "$FAILED" -eq 1 ]; then
             echo "One or more required checks failed."
-            echo "Every failing case from every task was printed above — this run does NOT stop at the first failure."
             exit 1
           fi
 
-          echo "All required checks passed. (Task 3 report is reviewed separately by your mentor.)"
+          echo "All required checks passed."
