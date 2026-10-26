@@ -32,3 +32,15 @@ variable "lambda_role_name" {
   type        = string
   default     = "lesson-12-lambda-role"
 }
+
+variable "local_aws" {
+  description = "Use an AWS-compatible local Docker emulator instead of AWS."
+  type        = bool
+  default     = false
+}
+
+variable "local_aws_endpoint" {
+  description = "Base endpoint for the local AWS-compatible emulator."
+  type        = string
+  default     = "http://localhost:4566"
+}

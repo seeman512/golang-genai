@@ -80,6 +80,18 @@ make deploy-tf
 make destroy-tf
 ```
 
+For an AWS-compatible Docker emulator named `flocki` (or Flocki), Terraform can
+plan against the container without AWS credentials:
+
+```bash
+FLOCKI_ENDPOINT=http://localhost:4566 make plan-tf-flocki
+```
+
+Use `FLOCKI_ENDPOINT=http://flocki:4566` when Terraform runs in another
+container on the same Docker network. The local plan uses separate
+`terraform/flocki.tfstate` and `terraform/flocki.tfplan` files. `make
+plan-tf-flocki` only creates a plan; it does not apply resources.
+
 Use either SAM deployment or Terraform for a given AWS stack, not both. Terraform
 configuration is documented in [`terraform/README.md`](terraform/README.md).
 

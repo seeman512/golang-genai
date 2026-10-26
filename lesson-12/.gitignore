@@ -3,4 +3,7 @@ build/
 terraform/.terraform/
 terraform/terraform.tfstate
 terraform/terraform.tfstate.*
+terraform/flocki.tfstate
+terraform/flocki.tfstate.*
+terraform/flocki.tfplan
 terraform/crash.log

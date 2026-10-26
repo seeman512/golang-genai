@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 .DEFAULT_GOAL := help
-.PHONY: help test build sam-build sam-invoke-avatar sam-invoke-welcome sam-api sam-smoke sam-deploy plan-tf deploy-tf destroy-tf invoke invoke-avatar invoke-welcome clean
+.PHONY: help test build sam-build sam-invoke-avatar sam-invoke-welcome sam-api sam-smoke sam-deploy plan-tf plan-tf-flocki deploy-tf destroy-tf invoke invoke-avatar invoke-welcome clean
 
 help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -49,6 +49,18 @@ sam-deploy: sam-build ## Deploy the SAM application to real AWS using guided Clo
 	sam deploy --template-file .aws-sam/build/template.yaml --guided
 
 plan-tf: build ## Initialize, validate, and show the Terraform plan for real AWS
+	scripts/deploy-tf.sh plan
+
+plan-tf-flocki: build ## Plan Terraform against the local Flocki Docker emulator
+	@AWS_ACCESS_KEY_ID=test \
+	AWS_SECRET_ACCESS_KEY=test \
+	AWS_DEFAULT_REGION=us-east-1 \
+	AWS_REGION=us-east-1 \
+	AWS_EC2_METADATA_DISABLED=true \
+	TF_VAR_local_aws=true \
+	TF_VAR_local_aws_endpoint="$${FLOCKI_ENDPOINT:-http://localhost:4566}" \
+	TF_STATE_FILE=flocki.tfstate \
+	TF_PLAN_FILE=flocki.tfplan \
 	scripts/deploy-tf.sh plan
 
 deploy-tf: build ## Apply the Terraform configuration after reviewing the plan

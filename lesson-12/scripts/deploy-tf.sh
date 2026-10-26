@@ -9,6 +9,15 @@ TF=$(command -v terraform || command -v tofu || true)
 [[ -n "$TF" ]] || { echo "Terraform >= 1.5 or OpenTofu is required" >&2; exit 1; }
 
 mode=${1:-plan}
+state_args=()
+plan_args=()
+if [[ -n "${TF_STATE_FILE:-}" ]]; then
+  state_args+=("-state=${TF_STATE_FILE}")
+fi
+if [[ -n "${TF_PLAN_FILE:-}" ]]; then
+  plan_args+=("-out=${TF_PLAN_FILE}")
+fi
+
 case "$mode" in
   plan|apply)
     for package in \
@@ -28,16 +37,20 @@ esac
 
 case "$mode" in
   plan)
-    "$TF" -chdir=terraform plan -input=false
+    "$TF" -chdir=terraform plan -input=false "${state_args[@]}" "${plan_args[@]}"
     echo
-    echo "Plan only. Review it, then run: make deploy-tf"
+    if [[ -n "${TF_PLAN_FILE:-}" ]]; then
+      echo "Plan saved to terraform/${TF_PLAN_FILE}. Review it before applying."
+    else
+      echo "Plan only. Review it, then run: make deploy-tf"
+    fi
     ;;
   apply)
-    "$TF" -chdir=terraform apply -input=false -auto-approve
+    "$TF" -chdir=terraform apply -input=false -auto-approve "${state_args[@]}"
     echo
     "$TF" -chdir=terraform output
     ;;
   destroy)
-    "$TF" -chdir=terraform destroy -input=false -auto-approve
+    "$TF" -chdir=terraform destroy -input=false -auto-approve "${state_args[@]}"
     ;;
 esac
