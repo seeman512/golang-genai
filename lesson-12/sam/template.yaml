@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Lesson 12 Go Lambda functions and API Gateway webhooks.
+
+Parameters:
+  LambdaArchitecture:
+    Type: String
+    Default: x86_64
+    AllowedValues:
+      - x86_64
+      - arm64
+    Description: Architecture used by the Go binaries and Lambda runtime.
+
+Globals:
+  Function:
+    Runtime: provided.al2023
+    Handler: bootstrap
+    Architectures:
+      - !Ref LambdaArchitecture
+    Timeout: 10
+    MemorySize: 256
+
+Resources:
+  PresentationFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: ..
+
+  PresentationWebhookFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: ..
+      Events:
+        GenericWebhook:
+          Type: Api
+          Properties:
+            Path: /webhook
+            Method: post
+
+  UserAvatarFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: ..
+
+  UserEventsWebhookFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: ..
+      Events:
+        UserEventsWebhook:
+          Type: Api
+          Properties:
+            Path: /user-events
+            Method: post
+
+Outputs:
+  GenericWebhookUrl:
+    Description: Generic webhook URL after sam deploy.
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/webhook"
+
+  UserEventsWebhookUrl:
+    Description: Registration webhook URL after sam deploy.
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/user-events"

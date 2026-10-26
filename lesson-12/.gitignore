@@ -1,0 +1,6 @@
+build/
+.aws-sam/
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.*
+terraform/crash.log

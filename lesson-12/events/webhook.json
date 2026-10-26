@@ -1,0 +1,13 @@
+{
+  "resource": "/webhook",
+  "path": "/webhook",
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "requestId": "lesson-12-demo"
+  },
+  "body": "{\"event\":\"book.created\",\"data\":{\"id\":42}}",
+  "isBase64Encoded": false
+}

@@ -1,0 +1,7 @@
+{
+  "event": "book.created",
+  "data": {
+    "id": 42,
+    "title": "The Go Programming Language"
+  }
+}

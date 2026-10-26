@@ -1,0 +1,7 @@
+{
+  "resource": "/webhook",
+  "path": "/webhook",
+  "httpMethod": "POST",
+  "body": "{",
+  "isBase64Encoded": false
+}

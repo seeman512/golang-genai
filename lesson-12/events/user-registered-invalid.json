@@ -1,0 +1,7 @@
+{
+  "resource": "/user-events",
+  "path": "/user-events",
+  "httpMethod": "POST",
+  "body": "{\"event\":\"user.registered\",\"data\":{\"user_id\":7,\"full_name\":\"Ada\",\"email\":\"not-an-email\"}}",
+  "isBase64Encoded": false
+}

@@ -1,0 +1,13 @@
+{
+  "resource": "/user-events",
+  "path": "/user-events",
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "requestId": "lesson-12-user-registered"
+  },
+  "body": "{\"event\":\"user.registered\",\"data\":{\"user_id\":7,\"full_name\":\"Ada Lovelace\",\"email\":\"ada@example.com\"}}",
+  "isBase64Encoded": false
+}
