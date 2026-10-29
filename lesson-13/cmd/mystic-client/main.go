@@ -14,21 +14,40 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	pb "mystic-square-grpc/gen/mysticsquare"
+	"mystic-square-grpc/internal/auth"
+	"mystic-square-grpc/internal/tlsconf"
 )
 
 func main() {
 	addr := flag.String("addr", "localhost:50051", "gRPC server address")
 	max := flag.Int("max", 0, "maximum status events to receive; zero means until Ctrl+C")
+	useTLS := flag.Bool("tls", false, "connect using mTLS")
+	certDir := flag.String("cert-dir", "certs", "certificate directory")
+	clientCert := flag.String("client-cert", "client", "client certificate: client | rogue-client | none")
+	token := flag.String("token", os.Getenv("MYSTIC_TOKEN"), "JWT token (or MYSTIC_TOKEN)")
 	flag.Parse()
 	if len(flag.Args()) == 0 {
 		usage()
 		os.Exit(2)
 	}
-	conn, err := grpc.NewClient(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	var transport credentials.TransportCredentials = insecure.NewCredentials()
+	if *useTLS {
+		config, configErr := tlsconf.ClientConfig(*certDir, *clientCert)
+		if configErr != nil {
+			fatal(configErr)
+		}
+		transport = credentials.NewTLS(config)
+	}
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(transport)}
+	if *token != "" {
+		opts = append(opts, grpc.WithPerRPCCredentials(auth.NewPerRPCToken(*token, *useTLS)))
+	}
+	conn, err := grpc.NewClient(*addr, opts...)
 	if err != nil {
 		fatal(err)
 	}
@@ -237,6 +256,9 @@ Commands:
   create-game [rows columns]
   get-game <game_id>
   moves <game_id> <row,column>...
+
+TLS/auth flags:
+  -tls -token TOKEN -client-cert client|none
 `)
 	flag.PrintDefaults()
 }

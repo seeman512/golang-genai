@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package mysticsquare.v1;
 
+import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "mystic-square-grpc/gen/mysticsquare;mysticsquare";
@@ -86,12 +87,40 @@ message GameMoveSummary {
 }
 
 service MysticSquareService {
-  rpc Register(RegisterRequest) returns (Registration);
-  rpc ConfirmRegistration(RegistrationRequest) returns (Registration);
-  rpc CompleteRegistration(RegistrationRequest) returns (Registration);
+  rpc Register(RegisterRequest) returns (Registration) {
+    option (google.api.http) = {
+      post: "/v1/registrations"
+      body: "*"
+    };
+  }
+  rpc ConfirmRegistration(RegistrationRequest) returns (Registration) {
+    option (google.api.http) = {
+      patch: "/v1/registrations/{registration_id}/confirm"
+      body: "*"
+    };
+  }
+  rpc CompleteRegistration(RegistrationRequest) returns (Registration) {
+    option (google.api.http) = {
+      patch: "/v1/registrations/{registration_id}/complete"
+      body: "*"
+    };
+  }
   rpc WatchRegistrationStatus(WatchRegistrationRequest)
-      returns (stream RegistrationStatusEvent);
-  rpc CreateGame(CreateGameRequest) returns (GameSnapshot);
-  rpc GetGame(GetGameRequest) returns (GameSnapshot);
+      returns (stream RegistrationStatusEvent) {
+    option (google.api.http) = {
+      get: "/v1/registrations/{registration_id}/watch"
+    };
+  }
+  rpc CreateGame(CreateGameRequest) returns (GameSnapshot) {
+    option (google.api.http) = {
+      post: "/v1/games"
+      body: "*"
+    };
+  }
+  rpc GetGame(GetGameRequest) returns (GameSnapshot) {
+    option (google.api.http) = {
+      get: "/v1/games/{game_id}"
+    };
+  }
   rpc SubmitGameMoves(stream GameMove) returns (GameMoveSummary);
 }

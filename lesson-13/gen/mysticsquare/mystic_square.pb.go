@@ -7,6 +7,7 @@
 package mysticsquare
 
 import (
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -781,7 +782,7 @@ var File_mystic_square_proto protoreflect.FileDescriptor
 
 const file_mystic_square_proto_rawDesc = "" +
 	"\n" +
-	"\x13mystic_square.proto\x12\x0fmysticsquare.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x84\x02\n" +
+	"\x13mystic_square.proto\x12\x0fmysticsquare.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x84\x02\n" +
 	"\fRegistration\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1b\n" +
@@ -843,15 +844,15 @@ const file_mystic_square_proto_rawDesc = "" +
 	"\aPENDING\x10\x02\x12\x12\n" +
 	"\x0eMAIL_CONFIRMED\x10\x03\x12\x0e\n" +
 	"\n" +
-	"REGISTERED\x10\x042\xfb\x04\n" +
-	"\x13MysticSquareService\x12K\n" +
-	"\bRegister\x12 .mysticsquare.v1.RegisterRequest\x1a\x1d.mysticsquare.v1.Registration\x12Z\n" +
-	"\x13ConfirmRegistration\x12$.mysticsquare.v1.RegistrationRequest\x1a\x1d.mysticsquare.v1.Registration\x12[\n" +
-	"\x14CompleteRegistration\x12$.mysticsquare.v1.RegistrationRequest\x1a\x1d.mysticsquare.v1.Registration\x12p\n" +
-	"\x17WatchRegistrationStatus\x12).mysticsquare.v1.WatchRegistrationRequest\x1a(.mysticsquare.v1.RegistrationStatusEvent0\x01\x12O\n" +
+	"REGISTERED\x10\x042\xf3\x06\n" +
+	"\x13MysticSquareService\x12i\n" +
+	"\bRegister\x12 .mysticsquare.v1.RegisterRequest\x1a\x1d.mysticsquare.v1.Registration\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/registrations\x12\x92\x01\n" +
+	"\x13ConfirmRegistration\x12$.mysticsquare.v1.RegistrationRequest\x1a\x1d.mysticsquare.v1.Registration\"6\x82\xd3\xe4\x93\x020:\x01*2+/v1/registrations/{registration_id}/confirm\x12\x94\x01\n" +
+	"\x14CompleteRegistration\x12$.mysticsquare.v1.RegistrationRequest\x1a\x1d.mysticsquare.v1.Registration\"7\x82\xd3\xe4\x93\x021:\x01*2,/v1/registrations/{registration_id}/complete\x12\xa3\x01\n" +
+	"\x17WatchRegistrationStatus\x12).mysticsquare.v1.WatchRegistrationRequest\x1a(.mysticsquare.v1.RegistrationStatusEvent\"1\x82\xd3\xe4\x93\x02+\x12)/v1/registrations/{registration_id}/watch0\x01\x12e\n" +
 	"\n" +
-	"CreateGame\x12\".mysticsquare.v1.CreateGameRequest\x1a\x1d.mysticsquare.v1.GameSnapshot\x12I\n" +
-	"\aGetGame\x12\x1f.mysticsquare.v1.GetGameRequest\x1a\x1d.mysticsquare.v1.GameSnapshot\x12P\n" +
+	"CreateGame\x12\".mysticsquare.v1.CreateGameRequest\x1a\x1d.mysticsquare.v1.GameSnapshot\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/games\x12f\n" +
+	"\aGetGame\x12\x1f.mysticsquare.v1.GetGameRequest\x1a\x1d.mysticsquare.v1.GameSnapshot\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/v1/games/{game_id}\x12P\n" +
 	"\x0fSubmitGameMoves\x12\x19.mysticsquare.v1.GameMove\x1a .mysticsquare.v1.GameMoveSummary(\x01B2Z0mystic-square-grpc/gen/mysticsquare;mysticsquareb\x06proto3"
 
 var (
